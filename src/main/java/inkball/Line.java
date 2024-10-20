@@ -2,13 +2,9 @@ package inkball;
 
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.Random;
-
-import processing.core.PImage;
 import processing.core.PApplet;
 
-
-public class Line {
+public class Line implements Drawable {
     //store all points that make up the line
     private ArrayList<Point> points;
     private final float thickness = 10.0f; 
@@ -25,7 +21,7 @@ public class Line {
         return points;
     }
 
-    public void draw(PApplet app) { //connect dots via line
+    public void draw(App app) { // Connect dots via line
         app.strokeWeight(thickness);
         if (points.size() > 1) {
             for (int i = 0; i < points.size() - 1; i++) {

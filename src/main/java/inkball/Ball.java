@@ -7,7 +7,7 @@ import java.util.HashMap;
 import processing.core.PImage;
 
 
-public class Ball {
+public class Ball implements Drawable {
 
     public static int radius = App.CELLSIZE / 2;
     private float x, y; //postiion
@@ -72,8 +72,7 @@ public class Ball {
     }
     
 
-    public void checkCollisions(String[][] board, HashMap<String, PImage> sprites) {
-        float diameter = 2 * radius;
+    public void checkCollisions(ArrayList<Wall> walls, ArrayList<Brick> bricks, HashMap<String, PImage> sprites) {
         float centreX = x;  // X coordinate of the centre of the ball
         float centreY = y;
 
@@ -86,54 +85,65 @@ public class Ball {
         }
 
         if (collisionBuffer == 0) {  // Proceed only if no recent collision
-            // Grid positions of the ball
-            int gridX = (int) (centreX / App.CELLSIZE);
-            int gridY = (int) ((centreY - App.TOPBAR) / App.CELLSIZE); 
-            
-            // Check for wall collisions
-            for (int i = -1; i <= 1; i++) {
-                for (int j = -1; j <= 1; j++) {
-                    int checkX = gridX + j;
-                    int checkY = gridY + i;
+            for (Wall wall : walls) {
+                float wallCentreX = wall.getX() * App.CELLSIZE + App.CELLSIZE / 2;
+                float wallCentreY = wall.getY() * App.CELLSIZE + App.CELLSIZE / 2 + App.TOPBAR;
 
-                    // check if within grid
-                    if (checkX >= 0 && checkX < board[0].length && checkY >= 0 && checkY < board.length) {
-                        String tile = board[checkY][checkX];
+                float distance = (float) Math.sqrt(Math.pow(centreX - wallCentreX, 2) + Math.pow(centreY - wallCentreY, 2));
 
-                        if (tile != null && tile.startsWith("wall")) {
-                            // tile Centre position
-                            float tileCentreX = (checkX * App.CELLSIZE) + (App.CELLSIZE / 2);
-                            float tileCentreY = (checkY * App.CELLSIZE) + (App.CELLSIZE / 2) + App.TOPBAR;
-
-                            // distance between Centres
-                            float distance = (float) Math.sqrt(Math.pow(centreX - tileCentreX, 2) + Math.pow(centreY - tileCentreY, 2));
-
-                            // if less than radius
-                            if (distance <= radius + (App.CELLSIZE / 2)) {
-                                if (Math.abs(centreX - tileCentreX) > Math.abs(centreY - tileCentreY)) {
-                                    vx *= -1;
-                                } else {
-                                    vy *= -1;
-                                }
-
-                                //check colour of wall
-                                if (tile.startsWith("wall")) {
-                                    String wallColour = tile;
-                                    String ballColour = wallColour.replace("wall", "ball"); //replace wall string to colour
-                                    PImage newSprite = sprites.get(ballColour); 
-
-                                    if (newSprite != null && tile != "wall0") {
-                                        changeColour(ballColour, newSprite);
-                                    }
-                                }
-
-                                collisionBuffer = 5;
-                                return;
-                            }
+                if (distance <= radius + App.CELLSIZE / 2) {
+                    if (Math.abs(centreX - wallCentreX) > Math.abs(centreY - wallCentreY)) {
+                        vx *= -1;
+                    } else {
+                        vy *= -1;
+                    }
+    
+                    // check wall colour and ball colour
+                    String wallType = wall.getType();
+                    String ballType = this.colour;
+                    
+                    // If the colors are different, change the ball's color to match the wall
+                    if (!wallType.equals("wall0") && !wallType.equals(ballType.replace("ball", "wall"))) {
+                        String newBallType = wallType.replace("wall", "ball");  // Convert wall type to ball type
+                        PImage newSprite = sprites.get(newBallType);  // Get the new sprite for the ball
+                        
+                        if (newSprite != null) {
+                            changeColour(newBallType, newSprite);  // Change the ball's color and sprite
                         }
                     }
+    
+                    // Set collision buffer to prevent immediate re-collision
+                    collisionBuffer = 2;
+                    return;
                 }
-            } 
+            }
+
+            for (Brick brick : bricks) {
+                if (!brick.isDestroyed()) {
+                    float brickCentreX = brick.getX() * App.CELLSIZE + App.CELLSIZE / 2;
+                    float brickCentreY = brick.getY() * App.CELLSIZE + App.CELLSIZE / 2 + App.TOPBAR;
+
+                    float distance = (float) Math.sqrt(Math.pow(centreX - brickCentreX, 2) + Math.pow(centreY - brickCentreY, 2));
+
+                    if (distance <= radius + App.CELLSIZE / 2) {
+                        if (Math.abs(centreX - brickCentreX) > Math.abs(centreY - brickCentreY)) {
+                            vx *= -1;
+                        } else {
+                            vy *= -1;
+                        }
+
+                        String brickType = brick.getType();
+                        String ballType = this.colour;
+                        // Damage the brick if the colors match, or if the brick is grey (brick0)
+                        if (brickType.equals("wall0") || brickType.equals(ballType.replace("ball", "wall"))) {
+                            brick.hit();  // Reduce the brick's health and change its sprite
+                        }
+
+                        collisionBuffer = 2;  // Set collision buffer
+                        return;
+                    }
+                }
+            }
         } else {
             collisionBuffer--;
         }
@@ -219,19 +229,6 @@ public class Ball {
         System.out.println("Ball color changed to: " + newColour);
         System.out.println("Updated color number: " + colourNumber);
     }
-
-    //get colour name from sprite name
-    /*private String getColourName(String spriteName) {
-        switch (spriteName) {
-            case "ball1": return "orange";
-            case "ball2": return "blue";
-            case "ball3": return "green";
-            case "ball4": return "yellow";
-            case "ball0": return "grey";
-            default: return "grey";
-        }
-    } */
-    
 
     //draw ball
     public void draw(App app) {

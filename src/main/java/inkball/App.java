@@ -32,12 +32,15 @@ public class App extends PApplet {
 
     public String configPath;
     private String[][] board;
+    private ArrayList<Wall> walls = new ArrayList<>();
     private ArrayList<Ball> balls = new ArrayList<>(); //stores balls
     private ArrayList<Line> lines;    // stores lines
     private ArrayList<Object[]> holeCentres = new ArrayList<>(); //stores the hole centres and colour (x , y , colour)
     private Line currentLine;          // current line drawn
     private ArrayList<int[]> spawnerLocations = new ArrayList<>(); //spawner coordinates
-    
+    private ArrayList<Brick> bricks = new ArrayList<>(); // stores bricks (EXTENSION)
+
+
     private Queue<String> ballColoursToSpawn = new LinkedList<>(); //ball colours to spawn
     private int spawnInterval;
     private int spawnTimer;
@@ -138,7 +141,8 @@ public class App extends PApplet {
         String[] spriteNames = {
             "tile", "wall0", "wall1", "wall2", "wall3", "wall4",
             "hole0", "hole1", "hole2", "hole3", "hole4", "entrypoint",
-            "ball0", "ball1", "ball2", "ball3", "ball4"
+            "ball0", "ball1", "ball2", "ball3", "ball4",
+            "break0", "break1", "break2", "break3", "break4" // extension sprites for broken tiles
         };
 
         //store them in hash map
@@ -175,7 +179,7 @@ public class App extends PApplet {
             } catch (NullPointerException e) {
                 
                 //catches error for if file not found
-                System.out.println("The file /inkball/" + spriteName + ".png is missing or inaccessible.");
+                System.out.println("The file /inkball/" + spriteName + ".png is missing or inaccessible");
             }
         }
         return sprite;
@@ -224,7 +228,7 @@ public class App extends PApplet {
                 processTile(i, j, tileChar, nextChar, lines[i]);
 
                 //skip next character if ball and hole to avoid number after the letter
-                if (tileChar == 'B' || tileChar == 'H') {
+                if (tileChar == 'B' || tileChar == 'H' || tileChar == 'F' || tileChar == 'V') {
                     j ++;
                 }
             }
@@ -239,6 +243,19 @@ public class App extends PApplet {
     }
 
     private void processTile(int row, int col, char tileChar, char nextChar, String line) {
+        
+        //adds wall
+        if (tileChar == 'X' || tileChar == '1' || tileChar == '2' || tileChar == '3' || tileChar == '4') {
+            String wallType = spriteNameFromChar(tileChar, ' ');
+            PImage wallSprite = getSprite(wallType);
+            Wall wall = new Wall(col, row, wallType, wallSprite);
+            walls.add(wall);
+            //board[row][col] = "wall";
+        }
+        
+         if (tileChar == '5' || tileChar == '6' || tileChar == '7' || tileChar == '8' || tileChar <= '9') {
+             addBrick(row, col, tileChar);
+         }
         
         //adds spawner coordinates if spawner detected
         if (tileChar == 'S') {
@@ -260,7 +277,7 @@ public class App extends PApplet {
         //sets sprite name for tile
         board[row][col] = spriteNameFromChar(tileChar, nextChar);
         
-        //add hole or bole
+        //add hole or ball
         if (tileChar == 'B') {
             addBall(row, col, nextChar);
         } else if (tileChar == 'H') {
@@ -305,6 +322,23 @@ public class App extends PApplet {
         
         //clear adjacent tile
         board[row][col + 1] = "tile";
+    }
+    
+    private void addBrick(int row, int col, char tileChar) {
+        //board[row][col] = spriteNameFromChar(tileChar, nextChar);
+        
+        if (tileChar >= '5' && tileChar <= '9') {
+            int tileValue = Character.getNumericValue(tileChar) - 5;
+            String type = "wall" + (tileValue); // Convert brick numbers to wall types
+            PImage brickSprite = getSprite(type);  // Use the same sprites as walls
+
+            //get cracked wall sprites
+            String type2 = "break" + (tileValue);
+            PImage crackedBrickSprite = getSprite(type2);
+
+            Brick brick = new Brick(col, row, type, brickSprite, crackedBrickSprite);
+            bricks.add(brick);
+        }
     }
     
     public void loadConfig(JSONObject levelData) {
@@ -402,7 +436,7 @@ public class App extends PApplet {
         //clear balls and lines
         balls.clear();
         lines.clear();
-        
+
         //load initial level data
         loadLevelData(currentLevelIndex);
         //loop();
@@ -414,6 +448,7 @@ public class App extends PApplet {
         //loop();
         balls.clear();
         lines.clear();
+
         loadLevelData(currentLevelIndex);
     }
 
@@ -573,6 +608,8 @@ public class App extends PApplet {
 
         //draw game elemenets: board, lines, balls, ball queue, timer and score
         drawBoard();
+        drawWalls();
+        drawBricks(); // EXTENSION
         drawLines();
         drawBalls();
         displayBallQueue();
@@ -582,21 +619,17 @@ public class App extends PApplet {
 
     private void drawBoard() {
 
-        //iterate through game board
+        // draw base board (standard tile and spawners only)
         for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board.length; j++) {
-                String spriteName = board[i][j];
-                if (spriteName != null) {
-                    
-                    //draw everything but hole
-                    if (!spriteName.startsWith("hole") || !spriteName.startsWith("X")) {
-                        PImage sprite = getSprite(spriteName);
-                        if (sprite != null) {
-
-                            //draw sprite at corresponding location
-                            image(sprite, j * CELLSIZE, i * CELLSIZE + TOPBAR, CELLSIZE, CELLSIZE);
-                        }
-                    }
+            for (int j = 0; j < board[i].length; j++) {
+                PImage tileSprite = getSprite("tile");
+                
+                if (board[i][j].equals("entrypoint")) {
+                    PImage spawnerSprite = getSprite("entrypoint");
+                    image(spawnerSprite, j * CELLSIZE, i * CELLSIZE + TOPBAR, CELLSIZE, CELLSIZE);
+                } else {
+                    // Otherwise, draw the tile sprite
+                    image(tileSprite, j * CELLSIZE, i * CELLSIZE + TOPBAR, CELLSIZE, CELLSIZE);
                 }
             }
         }
@@ -607,13 +640,22 @@ public class App extends PApplet {
                 String spriteName = board[i][j];
                 if (spriteName != null && spriteName.startsWith("hole")) {
                     PImage sprite = getSprite(spriteName);
-                    if (sprite != null) {
-                        
-                        //draw hole at corresponding location
-                        image(sprite, j * CELLSIZE, i * CELLSIZE + TOPBAR, CELLSIZE * 2, CELLSIZE * 2);
-                    }
+                    image(sprite, j * CELLSIZE, i * CELLSIZE + TOPBAR, CELLSIZE * 2, CELLSIZE * 2);
                 }
             }
+        }
+
+    }
+
+    private void drawWalls() {
+        for (Wall wall : walls) {
+            wall.draw(this);
+        }
+    }
+    
+    private void drawBricks() {
+        for (Brick brick : bricks) {
+            brick.draw(this);
         }
     }
 
@@ -785,7 +827,7 @@ public class App extends PApplet {
         if (!paused & !timeUp){
             ball.updatePostition();
         }
-        ball.checkCollisions(board, sprites);
+        ball.checkCollisions(walls, bricks, sprites);
         handleBallInteractions(ball, ballsToRemove);
         
         //draw updated ball
@@ -821,6 +863,9 @@ public class App extends PApplet {
             ballColoursToSpawn.add(String.valueOf(ballColourNumber)); // add ball back to queue
             spawnTimer = spawnInterval * FPS; //reset spawn timer
         }
+
+        //check if ball on acceleration tile
+        //ball.checkAccelerationTile(accelTiles);
     }
 
     private void increaseScore(int ballColourNumber) {
