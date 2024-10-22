@@ -8,6 +8,14 @@ public class Wall implements Drawable {
     private String type;
     private PImage sprite;
 
+    /**
+     * Constructs a Wall object with the specified position, type, and sprite.
+     *
+     * @param x      the x-coordinate of the wall on the grid
+     * @param y      the y-coordinate of the wall on the grid
+     * @param type   the type of the wall, which represents the wall's characteristics (e.g., color)
+     * @param sprite the PImage object representing the wall's sprite
+     */
     public Wall(int x, int y, String type, PImage sprite) {
         this.x = x;
         this.y = y;
@@ -15,24 +23,47 @@ public class Wall implements Drawable {
         this.sprite = sprite;
     }
 
-    // Getters for wall position and type
+    /**
+     * Gets the x-coordinate of the wall.
+     *
+     * @return the x-coordinate of the wall
+     */
     public int getX() {
         return x;
     }
 
+    /**
+     * Gets the y-coordinate of the wall.
+     *
+     * @return the y-coordinate of the wall
+     */
     public int getY() {
         return y;
     }
 
+    /**
+     * Gets the type of the wall, which is used to identify the wall's characteristics (e.g., color).
+     *
+     * @return the type of the wall as a string
+     */
     public String getType() {
         return type;
     }
 
+    /**
+     * Gets the sprite image of the wall.
+     *
+     * @return the PImage object representing the wall's sprite
+     */
     public PImage getSprite() {
         return sprite;
     }
 
-    // Method to draw the wall
+    /**
+     * Draws the wall on the screen at its specified position.
+     *
+     * @param app the App object used to render the wall
+     */
     public void draw(App app) {
         app.image(sprite, x * App.CELLSIZE, y * App.CELLSIZE + App.TOPBAR, App.CELLSIZE, App.CELLSIZE);
     }

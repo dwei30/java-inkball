@@ -89,7 +89,9 @@ public class App extends PApplet {
 
     private HashMap<String, PImage> sprites = new HashMap<>();
     
-    //INITIALIZATION
+    /**
+     * Constructor for the App class, sets the configuration file path.
+     */
     
     public App() {
         this.configPath = "config.json";
@@ -135,6 +137,9 @@ public class App extends PApplet {
         }*/
     }
 
+    /**
+     * Loads sprite images and stores them in a hashmap.
+     */
     private void loadSprites() {
 
         //list all sprite names to be used in game
@@ -151,11 +156,18 @@ public class App extends PApplet {
         }
     }
 
+    
+    /**
+     * Initializes the game board based on the height and width of the game window.
+     */
     private void initializeBoard() {
         //initialize board based on dimensions given
         this.board = new String[(HEIGHT-TOPBAR)/CELLSIZE][WIDTH/CELLSIZE];
     }
 
+    /**
+     * Loads game configuration data from the config file.
+     */
     private void loadConfigData() {
         
         //load config file
@@ -165,7 +177,14 @@ public class App extends PApplet {
 
     //PROCESSING GAME DATA
 
-    public PImage getSprite(String spriteName) {
+
+    /**
+     * Retrieves the sprite image for the given sprite name from the hashmap, or loads it from the file system if not found.
+     *
+     * @param spriteName the name of the sprite to load
+     * @return the PImage object representing the sprite
+     */
+    private PImage getSprite(String spriteName) {
 
         //load sprites from spriteName and store in hashmap
         PImage sprite = sprites.get(spriteName);
@@ -185,7 +204,12 @@ public class App extends PApplet {
         return sprite;
     }
 
-    public void loadLevelData(int levelIndex) {
+    /**
+     * Loads the level data for the specified level index, setting up the level layout and game elements.
+     *
+     * @param levelIndex the index of the level to load
+     */
+    private void loadLevelData(int levelIndex) {
         
         //check if the level index is within bounds
         if (levelIndex >= levels.size()) {
@@ -206,7 +230,12 @@ public class App extends PApplet {
         countdownTime = spawnInterval;
     }
 
-    public void loadLevel(String filename) {
+    /**
+     * Loads the level layout from the specified file.
+     *
+     * @param filename the name of the file containing the level layout
+     */
+    private void loadLevel(String filename) {
         
         //clear previous level coordinates
         clearLevelData();
@@ -235,6 +264,9 @@ public class App extends PApplet {
         }
     }
 
+    /**
+     * Clears the data of the current level, removing spawners and holes.
+     */
     private void clearLevelData() {
         
         //clear level data
@@ -242,6 +274,15 @@ public class App extends PApplet {
         holeCentres.clear();
     }
 
+    /**
+     * Processes the individual tile characters from the level file, creating game elements accordingly.
+     *
+     * @param row the row index of the tile
+     * @param col the column index of the tile
+     * @param tileChar the character representing the tile
+     * @param nextChar the next character in the line, used for multi-character tiles
+     * @param line the entire line being processed
+     */
     private void processTile(int row, int col, char tileChar, char nextChar, String line) {
         
         //adds wall
@@ -272,6 +313,14 @@ public class App extends PApplet {
         }
     }
 
+    /**
+     * Processes special tiles like holes and balls, adding them to the game board and storing relevant information.
+     *
+     * @param row      the row index of the special tile
+     * @param col      the column index of the special tile
+     * @param tileChar the character representing the special tile ('H' for hole, 'B' for ball)
+     * @param nextChar the next character in the line, used to determine the color of the hole or ball
+     */
     private void processSpecialTile(int row, int col, char tileChar, char nextChar) {
         
         //sets sprite name for tile
@@ -285,6 +334,13 @@ public class App extends PApplet {
         }
     }
 
+    /**
+     * Adds a ball to the game board based on the given row, column, and color.
+     *
+     * @param row the row index of the ball
+     * @param col the column index of the ball
+     * @param nextChar the character representing the ball color
+     */
     private void addBall(int row, int col, char nextChar) {
         
         //initialize ball coordinates
@@ -302,6 +358,13 @@ public class App extends PApplet {
         board[row][col + 1] = "tile";
     }
 
+    /**
+     * Adds a hole to the game board based on the given row, column, and color.
+     *
+     * @param row the row index of the hole
+     * @param col the column index of the hole
+     * @param nextChar the character representing the hole color
+     */
     private void addHole(int row, int col, char nextChar) {
         
         //make hole x2 bigger
@@ -324,8 +387,14 @@ public class App extends PApplet {
         board[row][col + 1] = "tile";
     }
     
+    /**
+     * Adds a brick to the game board based on the given row, column, and type.
+     *
+     * @param row the row index of the brick
+     * @param col the column index of the brick
+     * @param tileChar the character representing the brick type
+     */
     private void addBrick(int row, int col, char tileChar) {
-        //board[row][col] = spriteNameFromChar(tileChar, nextChar);
         
         if (tileChar >= '5' && tileChar <= '9') {
             int tileValue = Character.getNumericValue(tileChar) - 5;
@@ -341,6 +410,11 @@ public class App extends PApplet {
         }
     }
     
+    /**
+     * Loads the level configuration such as spawn intervals, ball colors, and score modifiers.
+     *
+     * @param levelData the JSON object containing the level configuration data
+     */
     public void loadConfig(JSONObject levelData) {
 
         //set spawn interval from config
@@ -366,6 +440,9 @@ public class App extends PApplet {
         loadScoreValues();
     }
 
+    /**
+     * Loads the score increase and decrease values from the config file.
+     */
     private void loadScoreValues() {
         
         //load score values from config file
@@ -390,6 +467,11 @@ public class App extends PApplet {
 
     //HANDLE INPUT
 
+    /**
+     * Handles keyboard input events, allowing the user to restart the game or pause/resume the game.
+     *
+     * @param event the KeyEvent object representing the key that was pressed
+     */
 	@Override
     public void keyPressed(KeyEvent event){
         
@@ -407,6 +489,9 @@ public class App extends PApplet {
         }
     }
 
+    /**
+     * Handles the logic for restarting the game or the current level based on the current game state.
+     */
     private void handleRestart() {
         
         //if game end reset entire game
@@ -419,6 +504,9 @@ public class App extends PApplet {
         }
     }
 
+    /**
+     * Resets the entire game to its initial state, clearing all game elements and starting from the first level.
+     */
     private void resetGame() {
         
         //if game ended, reset game
@@ -442,6 +530,9 @@ public class App extends PApplet {
         //loop();
     }
 
+    /**
+     * Restarts the current level, resetting the balls and lines while keeping the current level configuration.
+     */
     private void restartLevel() {
         
         //if level ended, restart level
@@ -453,13 +544,9 @@ public class App extends PApplet {
     }
 
     /**
-     * Receive key released signal from the keyboard.
+     * Handles mouse press events, allowing the user to start drawing a new line with the left click 
+     * or delete an existing line with the right click.
      */
-	// @Override
-    // public void keyReleased(){
-        
-    // }
-
     @Override
     public void mousePressed() {
         
@@ -471,6 +558,9 @@ public class App extends PApplet {
         }
     }
 	
+    /**
+     * Handles mouse drag events, allowing the user to add points to the current line while the left mouse button is held.
+     */
     @Override
     public void mouseDragged() {
         
@@ -480,6 +570,9 @@ public class App extends PApplet {
         }
     }
 
+    /**
+     * Handles mouse release events, finalizing the current line and adding it to the list of lines.
+     */
     @Override
     public void mouseReleased() {
 
@@ -490,6 +583,9 @@ public class App extends PApplet {
         }
     }
 
+    /**
+     * Starts a new line by creating a new Line object and adding the current mouse position as the first point.
+     */
     private void startNewLine() {
 
         //create new line and add mouse position to Line
@@ -497,6 +593,9 @@ public class App extends PApplet {
         currentLine.addPoint(mouseX, mouseY);
     }
 
+    /**
+     * Deletes the line closest to the current mouse position, if one exists, by iterating through all lines.
+     */
     private void deleteLine() {
 
         //iterate through lines to delete line closest to mouse position
@@ -512,7 +611,8 @@ public class App extends PApplet {
     // GAME LOOP AND DRAWING
     
     /**
-     * Draw all elements in the game by current frame.
+     * Draws the game elements on the screen, updating the game state and handling animations, 
+     * score display, and level completion checks.
      */
 	@Override
     public void draw() {
@@ -545,6 +645,9 @@ public class App extends PApplet {
         
     }
  
+    /**
+     * Updates the game status, including the spawn timer, time remaining, and game pause state.
+     */
     private void updateGameStatus() {
         
         //display relavent messages and update spawn timer if ball spawned
@@ -557,6 +660,9 @@ public class App extends PApplet {
         }
     }
     
+    /**
+     * Updates the remaining time for the current level, decrementing it each second, and checks if the time has run out.
+     */
     private void updateTimeRemaning() {
         
         //if level not ended and time not up
@@ -575,6 +681,9 @@ public class App extends PApplet {
         }
     }
     
+    /**
+     * Updates the spawn timer and triggers the spawning of a new ball when the timer reaches zero.
+     */
     private void updateSpawnTimer() {
 
         //if there are balls to spawn or timer active
@@ -604,6 +713,9 @@ public class App extends PApplet {
 
     // GAME ELEMENTS
 
+    /**
+     * Draws all the game elements including the board, walls, bricks, lines, balls, ball queue, timer, and score.
+     */
     private void drawGameElements() {
 
         //draw game elemenets: board, lines, balls, ball queue, timer and score
@@ -617,6 +729,9 @@ public class App extends PApplet {
         displayScore();
     }
 
+    /**
+     * Draws the game board, including the base tiles and spawners, as well as any special tiles such as holes.
+     */
     private void drawBoard() {
 
         // draw base board (standard tile and spawners only)
@@ -647,18 +762,27 @@ public class App extends PApplet {
 
     }
 
+    /**
+     * Draws all the wall elements on the game board.
+     */
     private void drawWalls() {
         for (Wall wall : walls) {
             wall.draw(this);
         }
     }
     
+    /**
+     * Draws all the breakable brick elements on the game board.
+     */
     private void drawBricks() {
         for (Brick brick : bricks) {
             brick.draw(this);
         }
     }
 
+    /**
+     * Draws all player-drawn lines and the current line being drawn.
+     */
     private void drawLines() {
         
         //draw lines if time not up
@@ -676,6 +800,9 @@ public class App extends PApplet {
         }
     }
 
+    /**
+     * Draws all the balls on the game board and updates their positions. Removes balls marked for removal.
+     */
     private void drawBalls() {
         
         //List to store removed balls
@@ -690,6 +817,9 @@ public class App extends PApplet {
         balls.removeAll(ballsToRemove);
     }
 
+    /**
+     * Displays the ball queue, showing the upcoming balls to be spawned and the last emitted ball.
+     */
     private void displayBallQueue() {
         
         //set queue display position
@@ -750,6 +880,9 @@ public class App extends PApplet {
 
     // SCORE AND TIMERS
 
+    /**
+     * Displays messages on the screen such as pause state, time up, or game end.
+     */
     private void displayMessages() {
         
         //display message on game state
@@ -773,6 +906,9 @@ public class App extends PApplet {
         }
     }
 
+    /**
+     * Updates the score based on the remaining time and animates the tiles when the level is complete.
+     */
     private void updateAndDrawScore() {
         
         //update score and yellow animations when level complete
@@ -796,6 +932,9 @@ public class App extends PApplet {
         }
     }
 
+    /**
+     * Displays the remaining time and the countdown timer for the next ball spawn on the screen.
+     */
     private void displayTimer() {
         
         //display timer
@@ -811,6 +950,9 @@ public class App extends PApplet {
         text(String.format("%.1f", spawnTimer / (float) FPS), countdownX, countdownY);
     }
 
+    /**
+     * Displays the player's current score on the screen.
+     */
     private void displayScore() {
         //display current score
         fill(0);
@@ -821,6 +963,12 @@ public class App extends PApplet {
 
     // LOGIC AND MECHANICS
 
+    /**
+     * Updates the position of the given ball, checks for collisions, and handles interactions such as entering holes.
+     *
+     * @param ball           the Ball object to update
+     * @param ballsToRemove  the list of balls marked for removal after interacting with a hole
+     */
     private void updateBalls(Ball ball, List<Ball> ballsToRemove) {
     
         //update ball postitions and check for collisions if not paused or not time up
@@ -834,6 +982,12 @@ public class App extends PApplet {
         ball.draw(this);
     }
 
+    /**
+     * Handles interactions between the ball and game elements such as lines, holes, and tiles.
+     *
+     * @param ball           the Ball object to check interactions for
+     * @param ballsToRemove  the list of balls marked for removal after interacting with a hole
+     */
     private void handleBallInteractions(Ball ball, List<Ball> ballsToRemove) {
         
         //ball colour
@@ -868,6 +1022,11 @@ public class App extends PApplet {
         //ball.checkAccelerationTile(accelTiles);
     }
 
+    /**
+     * Increases the score based on the ball's color when it enters the correct hole.
+     *
+     * @param ballColourNumber the color number of the ball that entered the hole
+     */
     private void increaseScore(int ballColourNumber) {
         
         //increase ball score based on colour
@@ -880,6 +1039,11 @@ public class App extends PApplet {
         }
     }
 
+    /**
+     * Decreases the score based on the ball's color when it enters the wrong hole.
+     *
+     * @param ballColourNumber the color number of the ball that entered the wrong hole
+     */
     private void decreaseScore(int ballColourNumber) {
 
         //decrease ball score based on colour
@@ -892,6 +1056,10 @@ public class App extends PApplet {
         }
     }
 
+    /**
+     * Checks if the level is complete by verifying if all balls have been cleared and if no more balls are left to spawn.
+     * If the level is complete, it handles transitioning to the next level or ending the game.
+     */
     private void checkLevelCompletion() {
 
         //check if all balls are cleared and level is completed
@@ -940,6 +1108,11 @@ public class App extends PApplet {
         }
     }
     
+    /**
+     * Animates yellow tiles during level completion, moving them around the board in a clockwise direction.
+     *
+     * @param i determines whether to animate the tiles this frame (1 for moving tiles, 0 for drawing tiles without movement)
+     */
     private void animateTiles(int i) {
 
         //retrieve yellow wall sprite
@@ -1000,12 +1173,21 @@ public class App extends PApplet {
         }
     }
 
+    /**
+     * Determines whether the current level is the last level in the game.
+     *
+     * @return true if the current level is the last level, false otherwise
+     */
     private boolean isLastLevel() {
 
         //checks if level index is last from levels
         return currentLevelIndex >= levels.size() - 1;
     }
     
+    /**
+     * Spawns a new ball at a random spawner location with a random velocity and color based on the ball queue.
+     * If no spawners or ball colors are available, this method does nothing.
+     */
     private void spawnBall() {
 
         //spawn new ball at random spawner location
@@ -1036,25 +1218,12 @@ public class App extends PApplet {
 
     // UTILITY
 
-    private String getSpriteNameFromColor(String colour) {
-
-        //return sprite name based on colour name
-        switch (colour.toLowerCase()) {
-            case "orange":
-                return "ball1";
-            case "blue":
-                return "ball2";
-            case "green":
-                return "ball3";
-            case "yellow":
-                return "ball4";
-            case "grey":
-                return "ball0";
-            default:
-                return "ball0";
-        }
-    }
-
+    /**
+     * Converts a color name to its corresponding numerical value.
+     *
+     * @param colourName the name of the color
+     * @return the numerical value corresponding to the color name
+     */
     private int getColourNumberFromName(String colourName) {
         
         //return colour number based on colour name
@@ -1074,6 +1243,12 @@ public class App extends PApplet {
         }
     }
 
+    /**
+     * Converts a color number to its corresponding color name.
+     *
+     * @param colorNumber the numerical value of the color
+     * @return the name of the color corresponding to the given number
+     */
     private String getColorNameFromNumber(int colorNumber) {
         
         //return colour name based on colour number
@@ -1093,7 +1268,14 @@ public class App extends PApplet {
         }
     }
 
-    public String spriteNameFromChar(char tileChar, char nextChar) {
+    /**
+     * Converts a tile character from the level file to its corresponding sprite name.
+     *
+     * @param tileChar the character representing the tile
+     * @param nextChar the next character in the line, used for multi-character tiles
+     * @return the sprite name corresponding to the tile character
+     */
+    private String spriteNameFromChar(char tileChar, char nextChar) {
         
         //map character fomr level files to sprite name
         switch (tileChar) {
@@ -1132,6 +1314,11 @@ public class App extends PApplet {
         }
     }
 
+    /**
+     * Returns the list of Ball objects currently in the game.
+     *
+     * @return the list of Ball objects
+     */
     public List<Ball> getBalls() {
         return balls;
     }

@@ -17,6 +17,16 @@ public class Ball implements Drawable {
     public int collisionBuffer = 0;
     private int colourNumber;
 
+    /**
+     * Creates a new Ball object with the specified position, velocity, color, and sprite.
+     *
+     * @param x      the initial x-coordinate of the ball
+     * @param y      the initial y-coordinate of the ball
+     * @param vx     the initial velocity in the x direction
+     * @param vy     the initial velocity in the y direction
+     * @param colour the color of the ball
+     * @param sprite the PImage object representing the ball's sprite
+     */
     public Ball(float x, float y, float vx, float vy, String colour, PImage sprite) {
         this.x = x + App.CELLSIZE / 2;
         this.y = y + App.CELLSIZE / 2;
@@ -27,6 +37,9 @@ public class Ball implements Drawable {
         this.colourNumber = Integer.parseInt(colour.substring(4));
     }
 
+    /**
+     * Initializes the ball's velocity randomly, setting it to either 2 or -2 in both x and y directions.
+     */
     public void initializeRandomVelocity() {
         //set velocity to either 2 or -2
         Random random = new Random();
@@ -34,44 +47,94 @@ public class Ball implements Drawable {
         this.vy = random.nextBoolean() ? -2 : 2;
     }
 
+    /**
+     * Gets the x-coordinate of the ball.
+     *
+     * @return the x-coordinate of the ball
+     */
     public float getX() {
         return x;
     }
     
+    /**
+     * Gets the y-coordinate of the ball.
+     *
+     * @return the y-coordinate of the ball
+     */
     public float getY() {
         return y;
     }
     
+    /**
+     * Gets the velocity in the x direction.
+     *
+     * @return the velocity in the x direction
+     */
     public float getVx() {
         return vx;
     }
     
+    /**
+     * Gets the velocity in the y direction.
+     *
+     * @return the velocity in the y direction
+     */
     public float getVy() {
         return vy;
     }
 
+    /**
+     * Updates the ball's position by adding the current velocity to its x and y coordinates.
+     */
     public void updatePostition() { //update ball postition
         x += vx;
         y += vy;
     }
 
+    /**
+     * Sets the velocity in the x direction.
+     *
+     * @param vx the new velocity in the x direction
+     */
     public void setVx(float vx) {
         this.vx = vx;
     }
 
+    /**
+     * Sets the velocity in the y direction.
+     *
+     * @param vy the new velocity in the y direction
+     */
     public void setVy(float vy) {
         this.vy = vy;
     }
 
+    /**
+     * Gets the color of the ball.
+     *
+     * @return the color of the ball as a string
+     */
     public String getColour() {
         return colour;
     }
 
+    /**
+     * Gets the numerical value representing the ball's color.
+     *
+     * @return the color number of the ball
+     */
     public int getColourNumber() {
         return colourNumber;
     }
     
-
+    /**
+     * Checks for collisions between the ball and walls or bricks. Updates the ball's velocity 
+     * and color if a collision is detected.
+     *
+     * @param walls   the list of Wall objects to check for collisions
+     * @param bricks  the list of Brick objects to check for collisions
+     * @param sprites a hashmap containing the sprites
+     */
     public void checkCollisions(ArrayList<Wall> walls, ArrayList<Brick> bricks, HashMap<String, PImage> sprites) {
         float centreX = x;  // X coordinate of the centre of the ball
         float centreY = y;
@@ -149,7 +212,15 @@ public class Ball implements Drawable {
         }
     }
 
-    //if near hole
+    
+    /**
+     * Checks if the ball is near a hole and changes size of ball if near hole
+     * If the ball is captured by the hole, it checks if the colors match and returns the appropriate result.
+     *
+     * @param holeCentres the list of hole centers and their associated colors
+     * @param ballColour  the color number of the ball
+     * @return 1 if the ball is captured by a matching hole, -1 if the ball enters a wrong hole, or 0 if not captured
+     */
     public int checkHole(ArrayList<Object[]> holeCentres, int ballColour){
         //ball Centre
         float centreX = x;
@@ -219,7 +290,12 @@ public class Ball implements Drawable {
         return 0;
     }
 
-    //change ball colour
+    /**
+     * Changes the color and sprite of the ball to the specified new color and sprite.
+     *
+     * @param newColour the new color for the ball
+     * @param newSprite the new sprite image for the ball
+     */
     public void changeColour(String newColour, PImage newSprite) {
         this.colour = newColour;
         this.sprite = newSprite;
@@ -230,7 +306,11 @@ public class Ball implements Drawable {
         System.out.println("Updated color number: " + colourNumber);
     }
 
-    //draw ball
+    /**
+     * Draws the ball on the screen using the current sprite at the ball's position.
+     *
+     * @param app the App object used to render the ball
+     */
     public void draw(App app) {
         //checkCollisions();
         app.image(sprite, x - radius , y - radius, 2 * radius, 2 * radius);

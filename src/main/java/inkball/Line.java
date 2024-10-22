@@ -9,18 +9,37 @@ public class Line implements Drawable {
     private ArrayList<Point> points;
     private final float thickness = 10.0f; 
 
+    /**
+     * Constructs a new Line object with an empty list of points.
+     */
     public Line() {
         this.points = new ArrayList<>();
     }
 
+    /**
+     * Adds a point to the line at the specified x and y coordinates.
+     *
+     * @param x the x-coordinate of the point to add
+     * @param y the y-coordinate of the point to add
+     */
     public void addPoint(float x, float y) {
         points.add(new Point((int) x, (int) y));
     }
 
-    public ArrayList<Point>  getPoints() {
+    /**
+     * Returns the list of points that make up the line.
+     *
+     * @return the list of points that form the line
+     */
+    public ArrayList<Point> getPoints() {
         return points;
     }
 
+    /**
+     * Draws the line on the screen by connecting the points with straight lines.
+     *
+     * @param app the App object used to render the line
+     */
     public void draw(App app) { // Connect dots via line
         app.strokeWeight(thickness);
         if (points.size() > 1) {
@@ -32,6 +51,13 @@ public class Line implements Drawable {
         }
     }
 
+    /**
+     * Checks if the mouse is near the line by comparing its position with each segment of the line.
+     *
+     * @param mouseX the x-coordinate of the mouse
+     * @param mouseY the y-coordinate of the mouse
+     * @return true if the mouse is near any segment of the line, false otherwise
+     */
     public boolean mouseNearLine(float mouseX, float mouseY) {
         for (int i = 0; i < points.size() -1; i ++) {
             Point p1 = points.get(i);
@@ -44,7 +70,12 @@ public class Line implements Drawable {
         return false;
     }
 
-    //check ball collision with line
+    /**
+     * Handles the collision between the ball and the line, adjusting the ball's velocity if a collision occurs.
+     *
+     * @param ball the Ball object to check for a collision
+     * @return true if a collision occurred, false otherwise
+     */
     public boolean handleCollision(Ball ball){
         float ballx = ball.getX();
         float bally = ball.getY();
@@ -98,19 +129,49 @@ public class Line implements Drawable {
         return false;
     }
 
-    //checks if point near line
+    /**
+     * Checks if a point is near a line segment by calculating the distance between the point and the segment.
+     *
+     * @param px the x-coordinate of the point
+     * @param py the y-coordinate of the point
+     * @param x1 the x-coordinate of the first point of the segment
+     * @param y1 the y-coordinate of the first point of the segment
+     * @param x2 the x-coordinate of the second point of the segment
+     * @param y2 the y-coordinate of the second point of the segment
+     * @return true if the point is near the segment, false otherwise
+     */
     private boolean pointNearSegment(float px, float py, float x1, float y1, float x2, float y2) {
         float dist = distanceToSegment(px, py, x1, y1, x2, y2);
         return dist <= thickness / 2;
     }
 
-    //checks if ball near line
+    /**
+     * Checks if a ball is near a line segment by calculating the distance between the ball and the segment.
+     *
+     * @param px the x-coordinate of the ball
+     * @param py the y-coordinate of the ball
+     * @param x1 the x-coordinate of the first point of the segment
+     * @param y1 the y-coordinate of the first point of the segment
+     * @param x2 the x-coordinate of the second point of the segment
+     * @param y2 the y-coordinate of the second point of the segment
+     * @return true if the ball is near the segment, false otherwise
+     */
     private boolean ballNearSegment(float px, float py, float x1, float y1, float x2, float y2) {
         float dist = distanceToSegment(px, py, x1, y1, x2, y2);
         return dist <= thickness / 2 + Ball.radius;
     }
 
-    //distance to segment
+    /**
+     * Calculates the distance from a point to a line segment.
+     *
+     * @param px the x-coordinate of the point
+     * @param py the y-coordinate of the point
+     * @param x1 the x-coordinate of the first point of the segment
+     * @param y1 the y-coordinate of the first point of the segment
+     * @param x2 the x-coordinate of the second point of the segment
+     * @param y2 the y-coordinate of the second point of the segment
+     * @return the distance from the point to the segment
+     */
     private float distanceToSegment(float px, float py, float x1, float y1, float x2, float y2) {
         float temp = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
         
@@ -126,9 +187,16 @@ public class Line implements Drawable {
         return dist(px, py, finalX, finalY);
     }
 
+    /**
+     * Calculates the Euclidean distance between two points.
+     *
+     * @param x1 the x-coordinate of the first point
+     * @param y1 the y-coordinate of the first point
+     * @param x2 the x-coordinate of the second point
+     * @param y2 the y-coordinate of the second point
+     * @return the distance between the two points
+     */
     private float dist(float x1, float y1, float x2, float y2) {
         return PApplet.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
     }
-
-
 }
