@@ -1,12 +1,10 @@
 <p align="center">
 </p>
-<p align="center"><strong style="font-size: 24px;">Inkball Game in Java</strong></p>
+<p align="center"><strong style="font-size: 46px;">Inkball Game in Java</strong></p>
 <p align="center" style="display: flex; justify-content: center; align-items: center;">
     <span style="display: inline-flex; align-items: center; background-color: #1c1c1c; padding: 5px; border-radius: 6px;">
     </span>
 </p>
-
----
 
 ## What is the InkBall Game?
 This project is a replica of the Inkball game found in older versions of Windows, developed in Java using the Processing library for graphics. The game involves directing coloured balls into holes of matching colour using player-drawn lines. If a ball enters a wrong hole, the score is penalized, and the ball respawns. The objective is to capture all the balls by guiding them to the correct holes.
