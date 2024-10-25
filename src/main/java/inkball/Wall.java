@@ -28,7 +28,7 @@ public class Wall implements Drawable {
      *
      * @return the x-coordinate of the wall
      */
-    public int getX() {
+    public float getX() {
         return x;
     }
 
@@ -37,7 +37,7 @@ public class Wall implements Drawable {
      *
      * @return the y-coordinate of the wall
      */
-    public int getY() {
+    public float getY() {
         return y;
     }
 
@@ -57,6 +57,16 @@ public class Wall implements Drawable {
      */
     public PImage getSprite() {
         return sprite;
+    }
+
+    /**
+     * Gets the sprite image of the wall.
+     *
+     * @param sprite the new PImage object
+     * @return the updated PImage object
+     */
+    public void setSprite(PImage sprite) {
+        this.sprite = sprite;
     }
 
     /**

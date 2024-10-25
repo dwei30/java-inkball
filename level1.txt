@@ -1,18 +1,18 @@
-XXXXXXX2222XXXXXXX
-X              H0X
-X                X
-X                X
-X                X
-X                X
-X    XX   XH1    X
-X     X XX       X
-X    SXX         X
-X     X XX H2    X
-X    XX   X      X
-X                X
-X                X
-X     B2         X
-X                X
-X              H0X
-X                X
-XXXXXXX1111XXXXXXX
+XXXXXX2222XXXXXXXX
+X         6    H0X
+X         6      X
+X         6      X
+5         6      X
+5         6      X
+5    XX   XH1    X
+5     X XX       X
+5    SXX         X
+5     X XX H2    X
+5    XX   X      X
+5         7      X
+5         7      X
+5     B2  7      X
+5         7      X
+X         7    H0X
+X         7      X
+XXXXXX1111XXXXXXXX

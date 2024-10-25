@@ -35,7 +35,7 @@ public class App extends PApplet {
     private ArrayList<Wall> walls = new ArrayList<>();
     private ArrayList<Ball> balls = new ArrayList<>(); //stores balls
     private ArrayList<Line> lines;    // stores lines
-    private ArrayList<Object[]> holeCentres = new ArrayList<>(); //stores the hole centres and colour (x , y , colour)
+    private ArrayList<Hole> holes = new ArrayList<>(); // stores holes
     private Line currentLine;          // current line drawn
     private ArrayList<int[]> spawnerLocations = new ArrayList<>(); //spawner coordinates
     private ArrayList<Brick> bricks = new ArrayList<>(); // stores bricks (EXTENSION)
@@ -98,7 +98,7 @@ public class App extends PApplet {
     }
 
     /**
-     * Initialise the setting of the window size.
+     * Initializes the window size for the application.
      */
 	@Override
     public void settings() {
@@ -106,7 +106,7 @@ public class App extends PApplet {
     }
 
     /**
-     * Load all resources such as images. Initialise the elements such as the player and map elements.
+     * Loads resources such as images and initializes game elements and other components.
      */
 	@Override
     public void setup() {
@@ -138,7 +138,7 @@ public class App extends PApplet {
     }
 
     /**
-     * Loads sprite images and stores them in a hashmap.
+     * Loads sprite images from the file system and stores them in a hashmap for efficient retrieval.
      */
     private void loadSprites() {
 
@@ -226,6 +226,8 @@ public class App extends PApplet {
         timeRemaining = levelData.getInt("time");
         levelEnded = false;
         timeUp = false;
+        gameEnded = false;
+        paused = false;
         spawnTimer = spawnInterval * FPS;
         countdownTime = spawnInterval;
     }
@@ -271,7 +273,11 @@ public class App extends PApplet {
         
         //clear level data
         spawnerLocations.clear();
-        holeCentres.clear();
+        holes.clear();
+        bricks.clear();
+        walls.clear();
+        balls.clear();
+        lines.clear();
     }
 
     /**
@@ -372,19 +378,20 @@ public class App extends PApplet {
         float holeCentreX = (col * CELLSIZE) + (CELLSIZE);
         float holeCentreY = (row * CELLSIZE) + (CELLSIZE) + TOPBAR;
         int holeColour = Character.getNumericValue(nextChar);
+        PImage holeSprite = getSprite("hole" + nextChar);
 
-        holeCentres.add(new Object[]{holeCentreX, holeCentreY, holeColour});
+        //holeCentres.add(new Object[]{holeCentreX, holeCentreY, holeColour});
 
-        String holeType = spriteNameFromChar('H', nextChar);
+        Hole hole = new Hole((int)holeCentreX, (int)holeCentreY, holeColour, holeSprite);
+        holes.add(hole);
 
-        //set other cells as hole
-        board[row][col] = holeType;
-        board[row][col + 1] = holeType;
-        board[row + 1][col] = holeType;
-        board[row + 1][col + 1] = holeType;
-        
-        //clear adjacent tile
-        board[row][col + 1] = "tile";
+        // String holeType = spriteNameFromChar('H', nextChar);
+
+        // //set other cells as hole
+        board[row][col] = "hole" + nextChar;
+        board[row][col + 1] = "hole" + nextChar;
+        board[row + 1][col] = "hole" + nextChar;
+        board[row + 1][col + 1] = "hole" + nextChar;
     }
     
     /**
@@ -536,7 +543,6 @@ public class App extends PApplet {
     private void restartLevel() {
         
         //if level ended, restart level
-        //loop();
         balls.clear();
         lines.clear();
 
@@ -549,7 +555,11 @@ public class App extends PApplet {
      */
     @Override
     public void mousePressed() {
-        
+
+        //disable drawing lines when game ended or timeup
+        if (gameEnded || timeUp) {
+            return;
+        }
         // create a new player-drawn line object if left click
         if (mouseButton == LEFT) {
             startNewLine();
@@ -635,6 +645,8 @@ public class App extends PApplet {
             updateAndDrawScore();
         }
 
+        
+
         //display messages like pause end
         displayMessages();
 
@@ -676,7 +688,8 @@ public class App extends PApplet {
             //if no time, timeup and level end
             if (timeRemaining == 0) {
                 timeUp = true;
-                levelEnded = true;
+                gameEnded = true;
+                levelEnded = true;        
             }
         }
     }
@@ -721,6 +734,7 @@ public class App extends PApplet {
         //draw game elemenets: board, lines, balls, ball queue, timer and score
         drawBoard();
         drawWalls();
+        drawHoles();
         drawBricks(); // EXTENSION
         drawLines();
         drawBalls();
@@ -749,17 +763,15 @@ public class App extends PApplet {
             }
         }
 
-        //iterate through game board again and draw holes
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board[i].length; j++) {
-                String spriteName = board[i][j];
-                if (spriteName != null && spriteName.startsWith("hole")) {
-                    PImage sprite = getSprite(spriteName);
-                    image(sprite, j * CELLSIZE, i * CELLSIZE + TOPBAR, CELLSIZE * 2, CELLSIZE * 2);
-                }
-            }
-        }
+    }
 
+    /**
+     * Draws all the holes on the game board.
+     */
+    private void drawHoles() {
+        for (Hole hole : holes) {
+            hole.draw(this);
+        }
     }
 
     /**
@@ -891,13 +903,13 @@ public class App extends PApplet {
             fill(255, 0, 0);
             textAlign(CENTER, CENTER);
             text("=== PAUSED ===", WIDTH / 2, TOPBAR - 20);
-        } else if (timeUp && gameEnded && !gameFinished) {
-            
+        } else if (timeUp && gameEnded && !gameFinished) {  
+
             //time up message
             fill(255, 0, 0);
             textAlign(CENTER, CENTER);
             text("=== TIME'S UP ===", WIDTH / 2, TOPBAR - 20);
-        } else if (gameEnded && gameFinished) {
+        } else if (!timeUp && gameEnded && gameFinished) {
             
             //game end message
             fill(255, 0, 0);
@@ -992,6 +1004,8 @@ public class App extends PApplet {
         
         //ball colour
         int ballColourNumber = ball.getColourNumber();
+
+        boolean resizingHappened = false;
         
         //check line collision with ball
         for (int i = lines.size() - 1; i >= 0; i --) {
@@ -1001,25 +1015,32 @@ public class App extends PApplet {
             }
         }
 
-        //check if ball enters hole
-        int result = ball.checkHole(holeCentres, ballColourNumber);
-        if (result == 1) {
+        for (Hole hole : holes) {
+            int status = hole.checkBallCapture(ball);
 
-            //correct hole/ball colour, increase score
-            increaseScore(ballColourNumber);
-            ballsToRemove.add(ball);
+            if (status == 1) {
 
-        } else if (result == -1) {
+                //correct hole/ball colour, increase score
+                increaseScore(ball.getColourNumber());
+                ballsToRemove.add(ball);
+                return;
 
-            //wrong colour, decreasej score and add ball back to queue
-            decreaseScore(ballColourNumber);
-            ballsToRemove.add(ball);
-            ballColoursToSpawn.add(String.valueOf(ballColourNumber)); // add ball back to queue
-            spawnTimer = spawnInterval * FPS; //reset spawn timer
+            } else if (status == -1) {
+
+                //wrong colour, decrease score and add ball back to queue
+                decreaseScore(ball.getColourNumber());
+                ballsToRemove.add(ball);
+                ballColoursToSpawn.add(String.valueOf(ball.getColourNumber())); // Add ball back to queue
+                spawnTimer = spawnInterval * FPS; // Reset spawn timer
+                return;
+            } else if (status == 0) {
+                resizingHappened = true;  // Track that a hole resized the ball
+            }
         }
 
-        //check if ball on acceleration tile
-        //ball.checkAccelerationTile(accelTiles);
+        if (!resizingHappened) {
+            ball.setRadius(App.CELLSIZE / 2);
+        }
     }
 
     /**
@@ -1069,7 +1090,6 @@ public class App extends PApplet {
             if (!gameEnded) {
                 
                 //add remaining time to score
-                System.out.println("time remaining: " + timeRemaining + " " + incrementingScore);
                 if (timeRemaining > 0 && !incrementingScore) {
                     incrementingScore = true;
                     incrementedTime = 0; //reset for new level
@@ -1086,6 +1106,8 @@ public class App extends PApplet {
                     //game finished
                     gameEnded = true;
                     gameFinished = true;
+                    timeUp = false;
+
                 } else {
                     
                     //move to next level only when finishing incrementing score 
@@ -1321,6 +1343,15 @@ public class App extends PApplet {
      */
     public List<Ball> getBalls() {
         return balls;
+    }
+
+    /**
+     * Returns the list of Hole objects currently in the game.
+     *
+     * @return the list of Hole objects
+     */
+    public List<Hole> getHoles() {
+        return holes;
     }
     
     public static void main(String[] args) {

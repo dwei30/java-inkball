@@ -9,7 +9,7 @@ import processing.core.PImage;
 
 public class Ball implements Drawable {
 
-    public static int radius = App.CELLSIZE / 2;
+    public int radius = App.CELLSIZE / 2;
     private float x, y; //postiion
     private float vx, vy; //velocity
     private String colour;
@@ -45,6 +45,15 @@ public class Ball implements Drawable {
         Random random = new Random();
         this.vx = random.nextBoolean() ? -2 : 2;
         this.vy = random.nextBoolean() ? -2 : 2;
+    }
+
+    /**
+     * Sets the radius of the ball
+     * 
+     * @param newRadius the new radius of the ball
+     */
+    public void setRadius(int newRadius) {
+        this.radius = newRadius;
     }
 
     /**
@@ -84,6 +93,15 @@ public class Ball implements Drawable {
     }
 
     /**
+     * Gets the radius of the ball
+     * 
+     * @return the ball radius
+     */
+    public int getRadius() {
+        return radius;
+    }
+
+    /**
      * Updates the ball's position by adding the current velocity to its x and y coordinates.
      */
     public void updatePostition() { //update ball postition
@@ -108,6 +126,7 @@ public class Ball implements Drawable {
     public void setVy(float vy) {
         this.vy = vy;
     }
+
 
     /**
      * Gets the color of the ball.
@@ -212,84 +231,6 @@ public class Ball implements Drawable {
         }
     }
 
-    
-    /**
-     * Checks if the ball is near a hole and changes size of ball if near hole
-     * If the ball is captured by the hole, it checks if the colors match and returns the appropriate result.
-     *
-     * @param holeCentres the list of hole centers and their associated colors
-     * @param ballColour  the color number of the ball
-     * @return 1 if the ball is captured by a matching hole, -1 if the ball enters a wrong hole, or 0 if not captured
-     */
-    public int checkHole(ArrayList<Object[]> holeCentres, int ballColour){
-        //ball Centre
-        float centreX = x;
-        float centreY = y;
-
-        //iterate through holes
-        for (Object[] holeCentre : holeCentres) {
-            float holeCentreX = (float) holeCentre[0];
-            float holeCentreY = (float) holeCentre[1];
-            int holeColour = (int) holeCentre[2];
-
-            //calculate distance
-            float dx = holeCentreX - centreX;
-            float dy = holeCentreY - centreY;
-            float distance = (float) Math.sqrt(dx * dx + dy * dy);
-
-            //if within 32 from centre
-            if (distance <= 32) {
-                // Calculate size factor based on distance to the centre of the hole
-                float sizeFactor = 1 - (distance / 32.0f);
-                radius = (int) (App.CELLSIZE / 2 * (1 - sizeFactor));
-
-                //attraction force
-                float attractionX = dx * 0.005f;
-                float attractionY = dy * 0.005f;
-
-                //adjust the direction
-                float currentSpeed = (float) Math.sqrt(vx * vx + vy * vy);
-
-                //update velocity
-                vx += attractionX;
-                vy += attractionY;
-
-                //normalize velocity to keep speed
-                float newSpeed = (float) Math.sqrt(vx * vx + vy * vy);
-                if (newSpeed > 0) {
-                    vx = (vx / newSpeed) * currentSpeed;
-                    vy = (vy / newSpeed) * currentSpeed;
-                }
-                
-
-                //check if captured
-                if (distance <= 10) {
-                    //check if ball colour matches hole, or grey colour ball, or grey colour hole
-                    
-                    //System.out.println("Checking ball color: " + ballColour + " against hole color: " + holeColour);
-                    if (holeColour == ballColour) {
-                        System.out.println("Exact match: " + holeColour + " and " + ballColour);
-                        return 1; // captured
-                    } else if (ballColour == 0) {
-                        System.out.println("Grey ball matched with hole color: " + holeColour);
-                        return 1; // captured
-                    } else if (holeColour == 0) {
-                        System.out.println("Ball color: " + ballColour + " matched with grey hole");
-                        return 1; // captured
-                    } else {
-                        System.out.println("Mismatch: Ball color " + ballColour + " and hole color " + holeColour);
-                        return -1; // nope
-                    }
-                }
-                return 0;
-            }
-        }
-
-        //if ball moved away
-        radius = App.CELLSIZE / 2;
-        return 0;
-    }
-
     /**
      * Changes the color and sprite of the ball to the specified new color and sprite.
      *
@@ -300,10 +241,6 @@ public class Ball implements Drawable {
         this.colour = newColour;
         this.sprite = newSprite;
         this.colourNumber = Integer.parseInt(newColour.substring(4)); // Update the colourNumber with the new color
-
-        // Debug print statements to confirm the change
-        System.out.println("Ball color changed to: " + newColour);
-        System.out.println("Updated color number: " + colourNumber);
     }
 
     /**

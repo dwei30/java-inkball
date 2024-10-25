@@ -11,4 +11,18 @@ public interface Drawable {
      * @param app the App object used to render the drawable object
      */
     void draw(App app);
+
+    /**
+     * Gets the x-coordinate of the drawable object.
+     *
+     * @return the x-coordinate of the object.
+     */
+    float getX();
+
+    /**
+     * Gets the y-coordinate of the drawable object.
+     *
+     * @return the y-coordinate of the object.
+     */
+    float getY();
 }

@@ -4,7 +4,7 @@ import java.awt.Point;
 import java.util.ArrayList;
 import processing.core.PApplet;
 
-public class Line implements Drawable {
+public class Line {
     //store all points that make up the line
     private ArrayList<Point> points;
     private final float thickness = 10.0f; 
@@ -81,12 +81,13 @@ public class Line implements Drawable {
         float bally = ball.getY();
         float ballVx = ball.getVx();
         float ballVy = ball.getVy();
+        float ballRadius = ball.getRadius();
 
         for (int i = 0; i < points.size() - 1; i++) { //iterate each point
             Point p1 = points.get(i);
             Point p2 = points.get(i+1);
 
-            if (ballNearSegment(ballx + ballVx, bally + ballVy, p1.x, p1.y, p2.x, p2.y)) {
+            if (ballNearSegment(ballx + ballVx, bally + ballVy, p1.x, p1.y, p2.x, p2.y, ballRadius)) {
                 
                 //calculate normal vectors
                 float dx = p2.x - p1.x;
@@ -156,9 +157,9 @@ public class Line implements Drawable {
      * @param y2 the y-coordinate of the second point of the segment
      * @return true if the ball is near the segment, false otherwise
      */
-    private boolean ballNearSegment(float px, float py, float x1, float y1, float x2, float y2) {
+    private boolean ballNearSegment(float px, float py, float x1, float y1, float x2, float y2, float ballRadius) {
         float dist = distanceToSegment(px, py, x1, y1, x2, y2);
-        return dist <= thickness / 2 + Ball.radius;
+        return dist <= thickness / 2 + ballRadius;
     }
 
     /**

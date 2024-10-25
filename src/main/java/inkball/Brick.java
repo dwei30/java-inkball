@@ -2,11 +2,11 @@ package inkball;
 
 import processing.core.PImage;
 
-public class Brick implements Drawable {
+public class Brick extends Wall {
 
-    private int x, y;
-    private String type;
-    private PImage sprite;
+    //private int x, y;
+    //private String type;
+    //private PImage sprite;
     private PImage crackedSprite; //cracked sprite
     private int hitCount; //track number of hits
     private final int maxHits = 3;
@@ -23,41 +23,10 @@ public class Brick implements Drawable {
      * @param crackedSprite the PImage object representing the cracked version of the brick's sprite
      */
     public Brick(int x, int y, String type, PImage sprite, PImage crackedSprite) {
-        this.x = x;
-        this.y = y;
-        this.type = type;
-        this.sprite = sprite;
+        super(x, y, type, sprite);
         this.crackedSprite = crackedSprite;
         this.hitCount = 0;
         this.destroyed = false;
-    }
-
-    // Getters for brick position and type
-    /**
-     * Gets the x-coordinate of the brick.
-     *
-     * @return the x-coordinate of the brick
-     */
-    public int getX() {
-        return x;
-    }
-
-    /**
-     * Gets the y-coordinate of the brick.
-     *
-     * @return the y-coordinate of the brick
-     */
-    public int getY() {
-        return y;
-    }
-
-    /**
-     * Gets the type of the brick, which is used to identify the brick's characteristics (e.g., color).
-     *
-     * @return the type of the brick as a string
-     */
-    public String getType() {
-        return type;
     }
 
     /**
@@ -79,22 +48,13 @@ public class Brick implements Drawable {
     }
 
     /**
-     * Gets the sprite image of the brick.
-     *
-     * @return the PImage object representing the brick's sprite
-     */
-    public PImage getSprite() {
-        return sprite;
-    }
-
-    /**
      * Draws the brick on the screen at its specified position if it has not been destroyed.
      *
      * @param app the App object used to render the brick
      */
     public void draw(App app) {
         if (!destroyed) {
-            app.image(sprite, x * App.CELLSIZE, y * App.CELLSIZE + App.TOPBAR, App.CELLSIZE, App.CELLSIZE);
+            app.image(getSprite(), getX() * App.CELLSIZE, getY() * App.CELLSIZE + App.TOPBAR, App.CELLSIZE, App.CELLSIZE);
         }
     }
 
@@ -112,7 +72,7 @@ public class Brick implements Drawable {
         if (hitCount >= maxHits) {
             destroyed = true;
         } else {
-            sprite = crackedSprite;
+            setSprite(crackedSprite);
         }
     }
 }
